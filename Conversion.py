@@ -1,11 +1,15 @@
-import xlrd 
-from xlwt import Workbook
+# import xlrd # read xlsx or xls files
+# from xlwt import Workbook # write xls files
+from openpyxl import Workbook, load_workbook # read and modify Excel 2010 files
 
-# loc = ("C:/Users/Umarbek Nasimov/Desktop/Oldways/StoreOrdersExport_Example.xlsx")
-loc = ("/Users/sophiazhi/Documents/GitHub/Oldways/StoreOrdersExport_Example.xlsx")
 
-wb = xlrd.open_workbook(loc)
-sheet = wb.sheet_by_index(0) #make a new sheet object
+loc_order_report = ("StoreOrdersExport_Example.xlsx")
+loc_sku_map = ("SKU_class_item.xlsx")
+
+wb_order_report = load_workbook(loc_order_report)
+# sheet = wb_order_report.sheet_by_index(0) #make a new sheet object
+
+wb_sku_map = load_workbook(loc_sku_map)
 
 '''
 num_of_rows=sheet.nrows #number of rows
@@ -18,21 +22,16 @@ for i in range(num_of_cols):
 '''
 
 wb_new = Workbook()
-sheet1 = wb_new.add_sheet("Modified Workbook")
+# sheet1 = wb_new.add_sheet("Modified Workbook") # xlwt 
+ws1 = wb_new.active
+ws1.title = "Sales Receipts"
 
-sheet1.write(0,0, "Customer")
-sheet1.write(0,1, "Date")
-sheet1.write(0,2, "Ref No.")
-sheet1.write(0,3, "Class")
-sheet1.write(0,4, "Payment method")
-sheet1.write(0,5, "Memo")
-sheet1.write(0,6, "Item")
-sheet1.write(0,7, "Quantity")
-sheet1.write(0,8, "Amount")
-sheet1.write(0,9, "Amount of Sales Receipt")
-sheet1.write(0,10, "Amount of transaction")
-sheet1.write(0,11, "Amount Deposited")
-sheet1.write(0,12, "Date deposited to CTC")
-sheet1.write(0,13, "Template Name")
 
-wb_new.save("test.xls")
+# write column names
+column_names = ['Customer', 'Date', 'Ref No.', 'Class', 'Payment method', 'Memo', 'Item', 'Quantity', 'Amount', 'Amount of Sales Receipt', 'Amount of transaction', 'Amount Deposited', 'Date deposited to CTC', 'Template Name']
+
+for i in range(len(column_names)):
+	ws1.cell(0+1, i+1, column_names[i])
+
+
+wb_new.save("Sales Receipts.xlsx")
