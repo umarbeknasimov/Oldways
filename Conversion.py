@@ -33,5 +33,22 @@ column_names = ['Customer', 'Date', 'Ref No.', 'Class', 'Payment method', 'Memo'
 for i in range(len(column_names)):
 	ws1.cell(0+1, i+1, column_names[i])
 
+ # for each row in store order report
+ 	# for each number in total quanitity
+ 		# customer
+ 		# date
+ 		# ref no
+ 		# search up class from sku
+ 		# payment
+ 		# memo
+ 		#item based on sku
+ 		# quantity unknown
+ 		# amount of sales received unknown
+ 		# amount of transaction = cost of total order
+ 		# amount deposited blank
+ 		# column M blank
+ 		template name = Customer Sales Receipt
+
+
 
 wb_new.save("Sales Receipts.xlsx")
