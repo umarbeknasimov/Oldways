@@ -12,8 +12,16 @@ class Product:
         field_dict = {field: value for field, value in field_list}
 
         # Then get the necessary fields from it
-        self.class_ = '' # TODO: Index the sku table
-        self.item = '' # TODO: Index the sku table
+        self.sku = field_dict["Product SKU"]
+
+        #indexing sku table:
+        sku_row = 0
+        for i in range(1, sku_sheet.max_row + 1):
+            if sku_sheet['C'+str(i)].value == self.sku:
+                sku_row = i
+
+        self.class_ = '' if sku_row == 0 else sku_sheet['A'+str(sku_row)].value 
+        self.item = '' if sku_row == 0 else sku_sheet['B'+str(sku_row)].value 
         self.quantity = field_dict["Product Qty"] # string because not used for calculations
         self.unit_amount = field_dict["Product Unit Price"]
         self.total_amount = field_dict["Product Total Price"]
@@ -80,13 +88,14 @@ class Order:
         return row_index + len(self.products)
 
 
-loc_order_report = ("OrderswithMoreThanOneProduct.xlsx")
+loc_order_report = ("DefaultOrderExportReport_Jan182019.xlsx")
 loc_sku_map = ("SKU_class_item.xlsx")
 
 wb_order_report = load_workbook(loc_order_report)
 # sheet = wb_order_report.sheet_by_index(0) #make a new sheet object
 
 wb_sku_map = load_workbook(loc_sku_map)
+sku_sheet = wb_sku_map.worksheets[0]
 
 '''
 num_of_rows=sheet.nrows #number of rows
