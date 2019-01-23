@@ -1,5 +1,3 @@
-# import xlrd # read xlsx or xls files
-# from xlwt import Workbook # write xls files
 from openpyxl import Workbook, load_workbook # read and modify Excel 2010 files
 
 
@@ -7,6 +5,7 @@ class Product:
     def __init__(self, str_):
         """Initializes a product from a comma-spliced string"""
         # First, make a dictionary of the fields
+        # Result is in the format {field name: field value} for product field names given in default order report column AV
         field_list = [[item.strip() for item in field_value.split(':')]\
                       for field_value in str_.split(',')]
         field_dict = {field: value for field, value in field_list}
@@ -19,7 +18,9 @@ class Product:
         for i in range(1, sku_sheet.max_row + 1):
             if sku_sheet['C'+str(i)].value == self.sku:
                 sku_row = i
+                break
 
+        # leave class and item values blank if we don't recognize the sku
         self.class_ = '' if sku_row == 0 else sku_sheet['A'+str(sku_row)].value 
         self.item = '' if sku_row == 0 else sku_sheet['B'+str(sku_row)].value 
         self.quantity = field_dict["Product Qty"] # string because not used for calculations
@@ -46,6 +47,7 @@ class Order:
     def __init__(self, ws, row_index):
         """Initializes an order from a worksheet and the row of that order"""
         # First, dictionary. The first row contains the names of the fields
+        # Result is in the format {column/field name: value in that column at row row_index}
         field_dict = {field: value for field, value in \
                       zip((cell.value for cell in \
                                list(ws.iter_rows(min_row = 1,         max_row = 1)        )[0]), \
@@ -60,6 +62,8 @@ class Order:
         self.memo = field_dict["Order ID"]
         self.total_amount = field_dict["Order Total (ex tax)"] # Tax is 0 for all examples given, though
         self.template = "Customer Sales Receipt"
+
+        # list of products, each initiated from part of the Product Details string, which lists products separated by '|'
         self.products = [Product(product) for product in field_dict["Product Details"].split('|')]
 
     def write_data(self, ws, row_index):
@@ -92,49 +96,19 @@ loc_order_report = ("DefaultOrderExportReport_Jan182019.xlsx")
 loc_sku_map = ("SKU_class_item.xlsx")
 
 wb_order_report = load_workbook(loc_order_report)
-# sheet = wb_order_report.sheet_by_index(0) #make a new sheet object
 
 wb_sku_map = load_workbook(loc_sku_map)
 sku_sheet = wb_sku_map.worksheets[0]
 
-'''
-num_of_rows=sheet.nrows #number of rows
-num_of_cols=sheet.ncols #number of columns
-print(num_of_rows, num_of_cols)
-print(sheet.cell_value(1,1)) #get the specific text at row 1, col 1
-
-for i in range(num_of_cols):
-    print(sheet.cell_value(0,i)) #print all the column names 
-'''
 
 wb_new = Workbook()
-# sheet1 = wb_new.add_sheet("Modified Workbook") # xlwt 
 ws1 = wb_new.active
 ws1.title = "Sales Receipts"
 
 
 # write column names
-
-
 for i, column_name in enumerate(Order.column_names):
     ws1.cell(0+1, i+1, column_name)
-
-
-# for each row in store order report
-    # for each number in total quanitity
-        # customer
-        # date
-        # ref no
-        # search up class from sku
-        # payment
-        # memo
-        # item based on sku
-        # quantity unknown
-        # amount of sales received unknown
-        # amount of transaction = cost of total order
-        # amount deposited blank
-        # column M blank
-# template name = Customer Sales Receipt
 
 orders = [Order(wb_order_report.active, row) for row in range(2, wb_order_report.active.max_row + 1)]
 curr_row = 2
