@@ -52,6 +52,15 @@ class Order:
                           (cell.value for cell in \
                                list(ws.iter_rows(min_row = row_index, max_row = row_index))[0]))}
 
+        
+        '''index_of_space = str(field_dict["Order Date"]).find(" ")
+        if index_of_space!= -1:
+            field_dict["Order Date"] = str(field_dict["Order Date"])[:index_of_space]
+        '''
+        try:
+            field_dict["Order Date"] = field_dict["Order Date"].date()
+        except: 
+            pass
         # Then, fields
         self.customer = "PRODUCTS"
         self.date = field_dict["Order Date"] # TODO: Figure out format, as there is a conflict
