@@ -7,17 +7,14 @@ loc_order_report = ("StoreOrdersExport_Example.xlsx")
 loc_sku_map = ("SKU_class_item.xlsx")
 
 wb_order_report = load_workbook(loc_order_report)
-order_sheet = wb_order_report.worksheets[0] #make a new sheet object
+# sheet = wb_order_report.sheet_by_index(0) #make a new sheet object
 
 wb_sku_map = load_workbook(loc_sku_map)
 
-
-num_rows=order_sheet.max_row #number of rows
-num_cols=order_sheet.max_column #number of columns
-
-print(num_rows, num_cols)
-print(order_sheet['A1'].value)
 '''
+num_of_rows=sheet.nrows #number of rows
+num_of_cols=sheet.ncols #number of columns
+print(num_of_rows, num_of_cols)
 print(sheet.cell_value(1,1)) #get the specific text at row 1, col 1
 
 for i in range(num_of_cols):
@@ -36,41 +33,21 @@ column_names = ['Customer', 'Date', 'Ref No.', 'Class', 'Payment method', 'Memo'
 for i in range(len(column_names)):
 	ws1.cell(0+1, i+1, column_names[i])
 
-for row in range(2, num_rows+1):
- 	# for each number in total num. unique items, column S = column 19
- 	ws1.cell(row, 1, "PRODUCTS")
-
- 	date = order_sheet['C'+str(row)].value
- 	# format date
- 	ws1.cell(row, 2, date)
- 	
- 	customer_name = order_sheet['N'+str(row)].value
- 	ws1.cell(row, 3, customer_name)
- 	
-
- 	# search up class from sku
- 		# SKU in column BD
- 		# umarbek will personally search it up in the other excdel sheet
- 	
- 	payment_method = order_sheet['R'+str(row)].value
- 	ws1.cell(row, 5, payment_method)
-
- 	memo = order_sheet['A'+str(row)].value
- 	ws1.cell(row, 6, memo)
-
- 	#item based on sku
- 	
- 	# quantity unknown
- 	
- 	# amount of sales received unknown
- 	
- 	# amount of transaction = cost of total order
- 	
- 	# amount deposited blank
- 	
- 	# column M blank
- 	
- 	ws1.cell(row, 14, "Custom Sales Receipt")
+ # for each row in store order report
+ 	# for each number in total quanitity
+ 		# customer
+ 		# date
+ 		# ref no
+ 		# search up class from sku
+ 		# payment
+ 		# memo
+ 		#item based on sku
+ 		# quantity unknown
+ 		# amount of sales received unknown
+ 		# amount of transaction = cost of total order
+ 		# amount deposited blank
+ 		# column M blank
+ 		template name = Customer Sales Receipt
 
 
 
