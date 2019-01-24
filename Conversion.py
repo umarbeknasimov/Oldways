@@ -60,9 +60,13 @@ class Order:
             field_dict["Order Date"] = str(field_dict["Order Date"])[:index_of_space]
         '''
         try:
-            field_dict["Order Date"] = field_dict["Order Date"].date()
+            year_month_date = str(field_dict["Order Date"].date()).split("-")
+            field_dict["Order Date"] = year_month_date[2]+"/" \
+            +year_month_date[1]+"/"+year_month_date[0]
         except: 
-            pass
+            year_month_date = field_dict["Order Date"].split("/")
+            field_dict["Order Date"] = year_month_date[1]+"/" \
+            +year_month_date[0]+"/"+year_month_date[2]
         # Then, fields
         self.customer = "PRODUCTS"
         self.date = field_dict["Order Date"] # TODO: Figure out format, as there is a conflict
