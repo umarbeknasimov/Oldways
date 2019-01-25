@@ -1,9 +1,12 @@
 from openpyxl import Workbook, load_workbook # read and modify Excel 2010 files
-
+from openpyxl.worksheet.dimensions import ColumnDimension
 
 class Product:
-    def __init__(self, str_):
+    def __init__(self, str_ = None):
         """Initializes a product from a comma-spliced string"""
+        if str_ is None:
+            return
+        
         # First, make a dictionary of the fields
         # Result is in the format {field name: field value} for product field names given in default order report column AV
         field_list = [[item.strip() for item in field_value.split(':')]\
@@ -23,21 +26,61 @@ class Product:
         # leave class and item values blank if we don't recognize the sku
         self.class_ = '' if sku_row == 0 else sku_sheet['A'+str(sku_row)].value 
         self.item = '' if sku_row == 0 else sku_sheet['B'+str(sku_row)].value 
-        self.quantity = field_dict["Product Qty"] # string because not used for calculations
-        self.unit_amount = field_dict["Product Unit Price"]
-        self.total_amount = field_dict["Product Total Price"]
+        self.quantity = int(field_dict["Product Qty"])
+        self.unit_cents = round(float(field_dict["Product Unit Price"]) * 100) # used for calculations; in cents
+        self.amount = self.unit_cents / 100 # not used for calculations
+        self.total_cents = round(float(field_dict["Product Total Price"]) * 100) # in cents
+
+    def from_data(class_ = '', item = '', quantity = 0, unit_cents = 0):
+        product = Product()
+        product.class_ = class_
+        product.item = item
+        product.quantity = quantity
+        product.unit_cents = unit_cents
+        product.amount = unit_cents / 100
+        product.total_cents = quantity * unit_cents
+        return product
+        
 
     def write_data(self, ws, row_index):
         """Writes the data to the worksheet at row_index"""
         items = {"Class": self.class_,
                  "Item": self.item,
                  "Quantity": self.quantity,
-                 "Amount": self.unit_amount}
+                 "Amount": self.amount}
         
         for field, value in items.items():
             ws.cell(row = row_index, column = Order.column_indexes[field]).value = value
 
+
+class Class:
+    def __init__(self, products):
+        """Products in `products` should be in the same class"""
+        self.name = products[0].class_
+        self.products = products
+
+    def from_products(products):
+        """Converts a list of products to a list of classes"""
+        if len(products) == 0:
+            return []
         
+        sorted_products = sorted(products, key = lambda x: x.class_)
+        product_list = []
+        classes = []
+        
+        for i, product in enumerate(sorted_products):
+            product_list.append(product)
+            if i + 1 == len(sorted_products) or sorted_products[i + 1].class_ != product.class_: # Class changed
+                classes.append(Class(product_list))
+                product_list = []
+                
+        return classes
+
+    def total_cents(self):
+        """Gets the total price of this class in cents"""
+        return sum(product.total_cents for product in self.products)
+
+
 class Order:
     column_names = ['Customer', 'Date', 'Ref No.', 'Class', 'Payment method', 'Memo', \
                     'Item', 'Quantity', 'Amount', 'Amount of Sales Receipt', 'Amount of transaction', \
@@ -65,15 +108,31 @@ class Order:
             pass
         # Then, fields
         self.customer = "PRODUCTS"
-        self.date = field_dict["Order Date"] # TODO: Figure out format, as there is a conflict
+        self.date = field_dict["Order Date"]
         self.ref_no = field_dict["Customer Name"]
         self.payment = field_dict["Payment Method"]
         self.memo = field_dict["Order ID"]
         self.total_amount = field_dict["Order Total (ex tax)"] # Tax is 0 for all examples given, though
         self.template = "Customer Sales Receipt"
+        self.ship_cost = round(float(field_dict["Shipping Cost (ex tax)"]) * 100) # In cents
 
         # list of products, each initiated from part of the Product Details string, which lists products separated by '|'
-        self.products = [Product(product) for product in field_dict["Product Details"].split('|')]
+        # converted to a list of classes
+        products = [Product(product) for product in field_dict["Product Details"].split('|')]
+        self.num_products = len(products)
+        self.classes = Class.from_products(products)
+
+        # Add shipping product if necessary
+        div = self.ship_cost // len(self.classes)
+        mod = self.ship_cost % len(self.classes)
+        
+        if self.ship_cost != 0:
+            for i, class_ in enumerate(self.classes):
+                class_.products.append(Product.from_data(class_=class_.name, item="POSTAGE & DEL",\
+                                                         quantity=1, unit_cents = div + (1 if i < mod else 0)))
+
+    def total_cents(self):
+        return sum(class_.total_cents() for class_ in self.classes)
 
     def write_data(self, ws, row_index):
         """
@@ -87,18 +146,32 @@ class Order:
                  "Memo": self.memo,
                  "Template Name": self.template}
 
-        for i, product in enumerate(self.products):
-            # Each row of the same order has the same overall data
-            for field, value in items.items():
-                ws.cell(row = row_index + i, column = Order.column_indexes[field]).value = value
-            # but the products are different
-            product.write_data(ws, row_index + i)
+        curr_row = row_index
+        for c, class_ in enumerate(self.classes):
+            for product in class_.products:
+                # Each row of the same order has the same overall data
+                for field, value in items.items():
+                    ws.cell(row = curr_row, column = Order.column_indexes[field]).value = value
+                # but the products are different
+                product.write_data(ws, curr_row)
+                
+                # a number needs to be added to Ref No. if there are multiple classes
+                if len(self.classes) > 1:
+                    ws.cell(row = curr_row, column = Order.column_indexes["Ref No."]).value = \
+                                self.ref_no + str(c + 1)
+                
+                curr_row += 1
+                
+            if len(self.classes) > 1:
+                ws.cell(row = curr_row - 1, column = Order.column_indexes["Amount of Sales Receipt"]).value = \
+                            class_.total_cents() / 100
+                pass
 
         # Total amount is on the last line of the order
-        ws.cell(row = row_index + len(self.products) - 1, \
-                column = Order.column_indexes["Amount of transaction"]).value = self.total_amount
+        ws.cell(row = curr_row - 1, \
+                column = Order.column_indexes["Amount of transaction"]).value = self.total_cents() / 100
 
-        return row_index + len(self.products)
+        return curr_row
 
 
 loc_order_report = ("DefaultOrderExportReport_Jan182019.xlsx")
@@ -123,5 +196,8 @@ orders = [Order(wb_order_report.active, row) for row in range(2, wb_order_report
 curr_row = 2
 for order in orders:
     curr_row = order.write_data(ws1, curr_row)
+
+#column_dim = ws1.column_dimensions['B']
+#column_dim.bestFit = True
 
 wb_new.save("Sales Receipts.xlsx")
