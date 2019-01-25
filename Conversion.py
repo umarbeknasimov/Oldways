@@ -206,3 +206,5 @@ for order in orders:
 #column_dim.bestFit = True
 
 wb_new.save("Sales Receipts.xlsx")
+# TODO: test new file name later
+# wb_new.save("Sales Receipts" + str(datetime.datetime.now()) + ".xlsx")
