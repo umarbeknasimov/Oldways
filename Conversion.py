@@ -1,6 +1,23 @@
 from openpyxl import Workbook, load_workbook # read and modify Excel 2010 files
 from openpyxl.worksheet.dimensions import ColumnDimension
 
+import os
+import glob
+import csv
+from xlsxwriter.workbook import Workbook as xlsxwriter_wb
+for csvfile in glob.glob("*.csv"):
+    workbook = xlsxwriter_wb(csvfile[:-4] + '.xlsx')
+    worksheet = workbook.add_worksheet()
+    with open(csvfile, 'rt', encoding='utf8') as f:
+        reader = csv.reader(f)
+        for r, row in enumerate(reader):
+            for c, col in enumerate(row):
+                try:
+                    worksheet.write(r, c, int(col))
+                except:
+                    worksheet.write(r,c,col)
+        workbook.close()
+
 class Product:
     def __init__(self, str_ = None):
         """Initializes a product from a comma-spliced string"""
@@ -205,6 +222,6 @@ for order in orders:
 #column_dim = ws1.column_dimensions['B']
 #column_dim.bestFit = True
 
-wb_new.save("Sales Receipts.xlsx")
+#wb_new.save("Sales Receipts.xlsx")
 # TODO: test new file name later
-# wb_new.save("Sales Receipts" + str(datetime.datetime.now()) + ".xlsx")
+wb_new.save("Sales Receipts" + str(datetime.datetime.now()) + ".xlsx")
