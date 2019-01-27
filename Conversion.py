@@ -249,6 +249,11 @@ for order in orders:
 #column_dim = ws1.column_dimensions['B']
 #column_dim.bestFit = True
 
-#wb_new.save("Sales Receipts.xlsx")
-# TODO: test new file name later
-wb_new.save("Sales Receipts" + str(datetime.datetime.now()) + ".xlsx")
+wb_new.save("Sales Receipts.xlsx")
+
+'''
+wb_new.save("Sales Receipts " \
+    + str(datetime.datetime.now().date()) + " " \
+    + str(datetime.datetime.now().hour) + ":" + str(datetime.datetime.now().minute) \
+    + ".xlsx")
+'''
