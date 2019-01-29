@@ -15,11 +15,9 @@ for csvfile in glob.glob("*.csv"):
         reader = csv.reader(f)
         for r, row in enumerate(reader):
             for c, col in enumerate(row):
-                try:
-                    worksheet.write(r, c, int(col))
-                except:
-                    worksheet.write(r,c,col)
+                worksheet.write(r,c,col)
         workbook.close()
+
 
 # Define the Product class, which represents a single product of which there may be multiple in one order,
 # and has certain attributes specific to the product and not to the order
@@ -156,7 +154,7 @@ class Order:
         self.date = field_dict["Order Date"]
         self.ref_no = field_dict["Customer Name"]
         self.payment = field_dict["Payment Method"]
-        self.memo = field_dict["Order ID"]
+        self.memo = field_dict["\ufeffOrder ID"]
         self.total_amount = field_dict["Order Total (ex tax)"] # Tax is 0 for all examples given, though
         self.template = "Customer Sales Receipt"
         self.ship_cost = round(float(field_dict["Shipping Cost (ex tax)"]) * 100) # In cents
