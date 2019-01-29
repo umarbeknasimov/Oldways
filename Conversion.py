@@ -6,9 +6,11 @@ import os
 import glob
 import csv
 from xlsxwriter.workbook import Workbook as xlsxwriter_wb
-for csvfile in glob.glob("*.csv"):
+# converts the csv file named "OrderExport.csv"
+# to change the csv file name, replace the text "OrderExport" below with your desired file name. Keep the ".csv" in the name
+for csvfile in glob.glob("OrderExport.csv"):
     # saves the order report .xlsx as the same name as the .csv
-    # to change the .xlsx file name, replace the text 'csvfile[:-4]' with 'new file name', in quotes
+    # to change the .xlsx file name, replace the text 'csvfile[:-4]' below with 'new file name', in quotes
     workbook = xlsxwriter_wb(csvfile[:-4] + '.xlsx') 
     worksheet = workbook.add_worksheet()
     with open(csvfile, 'rt', encoding='utf8') as f:
@@ -136,10 +138,7 @@ class Order:
                                list(ws.iter_rows(min_row = row_index, max_row = row_index))[0]))}
 
         # reformat date from DD-MM-YYYY or DD/MM/YYYY to MM/DD/YYYY
-        '''index_of_space = str(field_dict["Order Date"]).find(" ")
-        if index_of_space!= -1:
-            field_dict["Order Date"] = str(field_dict["Order Date"])[:index_of_space]
-        '''
+        
         try: # if date is stored as a datetime object, read the "-" characters and format accordingly
             year_month_date = str(field_dict["Order Date"].date()).split("-")
             field_dict["Order Date"] = year_month_date[2]+"/" \
@@ -247,11 +246,14 @@ for order in orders:
 #column_dim = ws1.column_dimensions['B']
 #column_dim.bestFit = True
 
-wb_new.save("Sales Receipts.xlsx")
+# wb_new.save("Sales Receipts.xlsx")
 
-'''
+# saves the sales receipt file under the name "Sales Receipts [date] [time].xlsx"
+# To change the file name, type without the number sign:
+# wb_new.save("My file name.xlsx")
+
 wb_new.save("Sales Receipts " \
     + str(datetime.datetime.now().date()) + " " \
     + str(datetime.datetime.now().hour) + ":" + str(datetime.datetime.now().minute) \
     + ".xlsx")
-'''
+
