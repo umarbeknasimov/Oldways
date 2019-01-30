@@ -1,5 +1,6 @@
 from openpyxl import Workbook, load_workbook # read and modify Excel 2010 files
 from openpyxl.worksheet.dimensions import ColumnDimension # tool to adjust column width
+import datetime #used to label export files
 
 # Convert store order report .csv to .xlsx by reading the .csv cell-by-cell and writing each cell into a .xlsx file
 import os
@@ -254,6 +255,5 @@ for order in orders:
 
 wb_new.save("Sales Receipts " \
     + str(datetime.datetime.now().date()) + " " \
-    + str(datetime.datetime.now().hour) + ":" + str(datetime.datetime.now().minute) \
-    + ".xlsx")
+    + str(datetime.datetime.now().hour) + "-" + str(datetime.datetime.now().minute) + ".xlsx")
 
