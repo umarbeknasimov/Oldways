@@ -220,7 +220,7 @@ class Order:
         return curr_row
 
 # load the order report .xlsx file that we created from the .csv file
-loc_order_report = ("DefaultOrderExportReport_Jan182019.xlsx")
+loc_order_report = ("OrderExport.xlsx")
 wb_order_report = load_workbook(loc_order_report)
 
 # load the .xlsx file containing sku/item/class information
@@ -255,5 +255,5 @@ for order in orders:
 
 wb_new.save("Sales Receipts " \
     + str(datetime.datetime.now().date()) + " " \
-    + str(datetime.datetime.now().hour) + "-" + str(datetime.datetime.now().minute) + ".xlsx")
+    + "{0:02}-{1:02}".format(datetime.datetime.now().hour, datetime.datetime.now().minute) + ".xlsx")
 
