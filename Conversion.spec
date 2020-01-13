@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['Conversion.py'],
-             pathex=['C:\\Users\\Joshua\\Documents\\GitHub\\Oldways'],
+             pathex=['/Users/sophiazhi/Documents/GitHub/Oldways'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -30,3 +30,7 @@ exe = EXE(pyz,
           upx=True,
           runtime_tmpdir=None,
           console=False )
+app = BUNDLE(exe,
+             name='Conversion.app',
+             icon=None,
+             bundle_identifier=None)

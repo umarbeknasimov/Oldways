@@ -1,0 +1,3 @@
+([('Conversion',
+   '/Users/sophiazhi/Documents/GitHub/Oldways/dist/Conversion',
+   'EXECUTABLE')],)
